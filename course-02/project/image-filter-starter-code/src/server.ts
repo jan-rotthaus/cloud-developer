@@ -19,16 +19,16 @@ import { filterImageFromURL, deleteLocalFiles } from './util/util';
     if (!image_url) {
       return res.status(400).send({ msg: 'Query param image_url must be provided.' });
     }
-    console.log("IN: " + image_url);
     filterImageFromURL(image_url).then(
       (filteredpath: string) => {
-        console.log("OUT: " + filteredpath);
         res.status(200).sendFile(filteredpath);
         res.on("finish", () => {
           deleteLocalFiles([filteredpath]);
         });
       }
-    )
+    ).catch(err => {
+      res.status(500).send({ msg: err });
+    })
   });
 
   // Root Endpoint
