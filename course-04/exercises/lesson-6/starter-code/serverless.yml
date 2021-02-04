@@ -1,12 +1,11 @@
-service:
-  name: serverless-udagram-app
+service: serverless-udagram-app
 
 plugins:
   - serverless-webpack
   - serverless-reqvalidator-plugin
   - serverless-aws-documentation
   - serverless-plugin-canary-deployments
-  - serverless-iam-roles-per-function
+  # - serverless-iam-roles-per-function
   - serverless-dynamodb-local
   - serverless-offline
 
@@ -16,10 +15,10 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  region: ${opt:region, 'eu-central-1'}
 
   tracing:
     lambda: true
@@ -30,9 +29,9 @@ provider:
     IMAGES_TABLE: Images-${self:provider.stage}
     IMAGE_ID_INDEX: ImageIdIndex
     CONNECTIONS_TABLE: Connections-${self:provider.stage}
-    IMAGES_S3_BUCKET: serverless-udagram-images-${self:provider.stage}
+    IMAGES_S3_BUCKET: serverless-udagram-images-jhr1973-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-${self:provider.stage}
+    THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-jhr1973-${self:provider.stage}
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH_0_SECRET_FIELD: auth0Secret
 
@@ -131,12 +130,9 @@ functions:
           path: groups
           cors: true
           authorizer: RS256Auth
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Create a new group
-            description: Create a new group
-            requestModels:
-              'application/json': GroupRequest
+          request:
+            schema:
+              application/json: ${file(models/create-group-request.json)}
     deploymentSettings:
       type: Linear10PercentEvery1Minute
       alias: Live
@@ -166,12 +162,9 @@ functions:
           authorizer: RS256Auth
           path: groups/{groupId}/images
           cors: true
-          reqValidatorName: RequestBodyValidator
-          documentation:
-            summary: Create a new image
-            description: Create a new image
-            requestModels:
-              'application/json': ImageRequest
+          request:
+            schema:
+              application/json: ${file(models/create-image-request.json)}
 
   SendUploadNotifications:
     environment:

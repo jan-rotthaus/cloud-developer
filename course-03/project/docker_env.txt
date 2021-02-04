@@ -1,0 +1,11 @@
+# This file is used for convenience of local development.
+# DO NOT STORE YOUR CREDENTIALS INTO GIT
+POSTGRES_USERNAME=postgres
+POSTGRES_PASSWORD=5jnJTZk59KyJzr3KOCuZ
+POSTGRES_HOST=udagram-rotthaus-dev.cg9xvkxkcvji.eu-central-1.rds.amazonaws.com
+POSTGRES_DB=udagram
+AWS_BUCKET=udagram-rotthaus-dev
+AWS_REGION=eu-central-1
+AWS_PROFILE=default
+JWT_SECRET=hello
+URL=http://localhost:8100

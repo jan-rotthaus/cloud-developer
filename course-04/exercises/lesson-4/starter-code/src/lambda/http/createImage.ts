@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as AWS  from 'aws-sdk'
+import * as AWS from 'aws-sdk'
 import * as uuid from 'uuid'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
@@ -11,7 +11,7 @@ const s3 = new AWS.S3({
 const groupsTable = process.env.GROUPS_TABLE
 const imagesTable = process.env.IMAGES_TABLE
 const bucketName = process.env.IMAGES_S3_BUCKET
-const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+const urlExpiration = parseInt(process.env.SIGNED_URL_EXPIRATION)
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log('Caller event', event)

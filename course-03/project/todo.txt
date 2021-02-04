@@ -1,0 +1,23 @@
+aws eks --region eu-central-1 update-kubeconfig --name Udagram
+kubectl apply -f .\env-secret.yaml
+kubectl apply -f .\udagram-feed-api\deploy\deployment.yaml
+kubectl apply -f .\udagram-feed-api\deploy\service.yaml
+kubectl apply -f .\udagram-user-api\deploy\deployment.yaml
+kubectl apply -f .\udagram-user-api\deploy\service.yaml
+kubectl apply -f .\udagram-reverse-proxy\deploy\deployment.yaml
+kubectl apply -f .\udagram-reverse-proxy\deploy\service.yaml
+kubectl apply -f .\udagram-frontend\deploy\deployment.yaml
+kubectl apply -f .\udagram-frontend\deploy\service.yaml
+kubectl port-forward service/udagram-reverse-proxy-svc 8080:8080
+kubectl port-forward service/udagram-frontend-svc 8100:8100
+kubectl autoscale deployment udagram-feed-api --cpu-percent=50 --min=2 --max=4
+
+kubectl delete hpa udagram-feed-api
+kubectl delete --all services
+kubectl delete --all deployments
+kubectl delete --all secrets
+
+kubectl get pods
+kubectl describe services
+kubectl describe hpa
+kubectl logs udagram-feed-api

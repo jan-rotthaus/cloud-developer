@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as AWS  from 'aws-sdk'
+import * as AWS from 'aws-sdk'
+import * as uuid from 'uuid'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 
@@ -25,13 +26,31 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   }
 
   // TODO: Create an image
+  const now = new Date().toISOString()
+  const itemId = uuid.v4()
+
+  const parsedBody = JSON.parse(event.body)
+
+  const newItem = {
+    groupId: groupId,
+    timestamp: now,
+    id: itemId,
+    ...parsedBody
+  }
+
+  await docClient.put({
+    TableName: imagesTable,
+    Item: newItem
+  }).promise()
 
   return {
     statusCode: 201,
     headers: {
       'Access-Control-Allow-Origin': '*'
     },
-    body: ''
+    body: JSON.stringify({
+      newItem
+    })
   }
 }
 

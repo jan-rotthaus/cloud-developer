@@ -1,13 +1,13 @@
-'use strict'
+'use strict';
 
-const AWS = require('aws-sdk')
+const AWS = require('aws-sdk');
 
-const docClient = new AWS.DynamoDB.DocumentClient()
+const docClient = new AWS.DynamoDB.DocumentClient();
 
-const groupsTable = process.env.GROUPS_TABLE
+const groupsTable = process.env.GROUPS_TABLE;
 
 exports.handler = async (event) => {
-  console.log('Processing event: ', event)
+  console.log('Processing event: ', event);
 
   // TODO: Read and parse "limit" and "nextKey" parameters from query parameters
   // let nextKey // Next key to continue scan operation if necessary
@@ -15,23 +15,33 @@ exports.handler = async (event) => {
 
   // HINT: You might find the following method useful to get an incoming parameter value
   // getQueryParameter(event, 'param')
+  const limit = getQueryParameter(event, 'limit');
+  const nextKey = getQueryParameter(event, 'nextKey');
 
   // TODO: Return 400 error if parameters are invalid
+  if (!limit) {
+    return {
+      statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    };
+  }
 
   // Scan operation parameters
   const scanParams = {
     TableName: groupsTable,
     // TODO: Set correct pagination parameters
-    // Limit: ???,
-    // ExclusiveStartKey: ???
-  }
-  console.log('Scan params: ', scanParams)
+    Limit: limit,
+    ExclusiveStartKey: decodeNextKey(nextKey)
+  };
+  console.log('Scan params: ', scanParams);
 
-  const result = await docClient.scan(scanParams).promise()
+  const result = await docClient.scan(scanParams).promise();
 
-  const items = result.Items
+  const items = result.Items;
 
-  console.log('Result: ', result)
+  console.log('Result: ', result);
 
   // Return result
   return {
@@ -44,8 +54,8 @@ exports.handler = async (event) => {
       // Encode the JSON object so a client can return it in a URL as is
       nextKey: encodeNextKey(result.LastEvaluatedKey)
     })
-  }
-}
+  };
+};
 
 /**
  * Get a query parameter or return "undefined"
@@ -56,12 +66,12 @@ exports.handler = async (event) => {
  * @returns {string} a value of a query parameter value or "undefined" if a parameter is not defined
  */
 function getQueryParameter(event, name) {
-  const queryParams = event.queryStringParameters
+  const queryParams = event.queryStringParameters;
   if (!queryParams) {
-    return undefined
+    return undefined;
   }
 
-  return queryParams[name]
+  return queryParams[name];
 }
 
 /**
@@ -73,8 +83,17 @@ function getQueryParameter(event, name) {
  */
 function encodeNextKey(lastEvaluatedKey) {
   if (!lastEvaluatedKey) {
-    return null
+    return null;
   }
 
-  return encodeURIComponent(JSON.stringify(lastEvaluatedKey))
+  return encodeURIComponent(JSON.stringify(lastEvaluatedKey));
+}
+
+function decodeNextKey(lastEvaluatedKey) {
+
+  if (!lastEvaluatedKey) {
+    return null;
+  }
+
+  return JSON.parse(decodeURIComponent(lastEvaluatedKey));
 }
